@@ -8,6 +8,5 @@ pyjsparser
 pandas
 numpy
 streamlit
-pandas-ta
 yfinance
 streamlit-autorefresh
