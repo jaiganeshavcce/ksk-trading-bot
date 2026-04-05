@@ -12,7 +12,10 @@ from typing import Any
 import pandas as pd
 import requests
 
-from neo_api_client import NeoAPI
+try:
+    from neo_api_client import NeoAPI  # type: ignore
+except ImportError:
+    NeoAPI = None  # type: ignore  # not available on Streamlit Cloud; screener uses yfinance only
 
 # Directories relative to this file
 _HERE = Path(__file__).resolve().parent
