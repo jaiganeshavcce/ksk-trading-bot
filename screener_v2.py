@@ -389,48 +389,36 @@ def _calculate_indicators_fallback(frame: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_indicators(frame: pd.DataFrame) -> pd.DataFrame:
     try:
-        import pandas_ta as ta  # type: ignore
-
-        # pandas_ta VWAP requires a DatetimeIndex
         result = frame.copy()
         if "timestamp" in result.columns:
             result = result.set_index(pd.DatetimeIndex(pd.to_datetime(result["timestamp"])))
 
-        close = result["close"]
-        high = result["high"]
-        low = result["low"]
+        close  = result["close"]
+        high   = result["high"]
+        low    = result["low"]
         volume = result["volume"].fillna(0.0)
 
-        # RSI — fall back to manual if pandas_ta returns None
-        rsi_series = ta.rsi(close, length=14)
-        if rsi_series is None:
-            delta = close.diff()
-            avg_gain = delta.clip(lower=0.0).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
-            avg_loss = (-delta.clip(upper=0.0)).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
-            rs = avg_gain / avg_loss.replace(0, pd.NA)
-            rsi_series = (100 - (100 / (1 + rs))).fillna(50.0)
-        result["rsi_14"] = rsi_series
+        # RSI(14) — Wilder EMA method
+        delta    = close.diff()
+        avg_gain = delta.clip(lower=0.0).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+        avg_loss = (-delta.clip(upper=0.0)).ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
+        rs = avg_gain / avg_loss.replace(0, pd.NA)
+        result["rsi_14"] = (100 - (100 / (1 + rs))).fillna(50.0)
 
-        ema20 = ta.ema(close, length=20)
-        result["ema_20"] = ema20 if ema20 is not None else close.ewm(span=20, adjust=False).mean()
+        # EMA 20 / 50
+        result["ema_20"] = close.ewm(span=20, adjust=False).mean()
+        result["ema_50"] = close.ewm(span=50, adjust=False).mean()
 
-        ema50 = ta.ema(close, length=50)
-        result["ema_50"] = ema50 if ema50 is not None else close.ewm(span=50, adjust=False).mean()
-
-        # Always use pandas rolling for SMA200 — ta.sma returns None when bars < 200
+        # SMA 200 (rolling so it works with < 200 bars)
         result["sma_200"] = close.rolling(window=200, min_periods=1).mean()
 
-        # VWAP
-        vwap_series = ta.vwap(high=high, low=low, close=close, volume=volume)
-        if vwap_series is None or (isinstance(vwap_series, pd.Series) and vwap_series.isna().all()):
-            typical = (high + low + close) / 3.0
-            cumvol = volume.replace(0, pd.NA).cumsum()
-            result["vwap"] = ((typical * volume).cumsum() / cumvol).fillna(close)
-        else:
-            result["vwap"] = vwap_series
+        # VWAP (intraday cumulative)
+        typical  = (high + low + close) / 3.0
+        cumvol   = volume.replace(0, pd.NA).cumsum()
+        result["vwap"] = ((typical * volume).cumsum() / cumvol).fillna(close)
 
-        avgvol = ta.sma(volume, length=20)
-        result["avg_volume_20"] = avgvol if avgvol is not None else volume.rolling(window=20, min_periods=1).mean()
+        # Avg volume 20
+        result["avg_volume_20"] = volume.rolling(window=20, min_periods=1).mean()
 
         result = result.ffill().bfill()
         if "timestamp" not in result.columns:
