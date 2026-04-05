@@ -1,0 +1,28 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+trading_bot/venv/
+releases/trading_bot_v1/venv/
+.venv/
+venv/
+
+# ── Credentials — NEVER upload these ──────────────────────────────────────────
+# (config.json now has blank values but kept out of git as an extra safeguard)
+trading_bot/config.json
+releases/trading_bot_v1/config.json
+.streamlit/secrets.toml
+
+# ── Runtime / logs ────────────────────────────────────────────────────────────
+trading_bot/bot_runtime.log
+*.log
+
+# ── OS junk ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
