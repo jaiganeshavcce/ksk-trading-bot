@@ -1,0 +1,13 @@
+requests
+PyJWT
+websocket-client
+websockets
+python-dotenv
+python-dateutil
+pyjsparser
+pandas
+numpy
+streamlit
+pandas-ta
+yfinance
+streamlit-autorefresh

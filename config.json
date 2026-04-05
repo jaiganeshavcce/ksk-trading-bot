@@ -1,0 +1,18 @@
+{
+    "environment": "prod",
+    "symbol": {
+        "exchange_segment": "nse_cm",
+        "instrument_token": "",
+        "trading_symbol": "TATASTEEL-EQ",
+        "quantity": 1,
+        "product": "NRML"
+    },
+    "sma_window": 5,
+    "entry_threshold_pct": 0.12,
+    "order_type": "MKT",
+    "limit_price_offset_pct": 0.1,
+    "trigger_price_offset_pct": 0.05,
+    "cooldown_seconds": 30,
+    "poll_interval_seconds": 2,
+    "decision_interval_seconds": 5
+}
